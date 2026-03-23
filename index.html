@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DriveBox — Envio Fácil</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --accent: #4ade80;
+    --accent2: #22d3ee;
+    --accent3: #a78bfa;
+    --text: #f0f4ff;
+    --muted: #6b7a99;
+    --border: rgba(255,255,255,0.07);
+    --danger: #f87171;
+    --warning: #fbbf24;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 10%, rgba(74,222,128,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 10% 80%, rgba(34,211,238,0.07) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 60% at 50% 50%, rgba(167,139,250,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative; z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .logo h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.35rem;
+    letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--accent); }
+
+  .auth-btn {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.55rem 1.2rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .auth-btn:hover { background: var(--surface); border-color: var(--accent); color: var(--accent); }
+  .auth-btn.connected { border-color: var(--accent); color: var(--accent); }
+  .auth-btn .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.3s;
+  }
+  .auth-btn.connected .dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+  /* SETUP NOTICE */
+  .setup-notice {
+    background: rgba(167,139,250,0.08);
+    border: 1px solid rgba(167,139,250,0.25);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: #c4b5fd;
+  }
+  .setup-notice strong { color: var(--accent3); }
+  .setup-notice code {
+    background: rgba(167,139,250,0.15);
+    border-radius: 4px;
+    padding: 0.1em 0.4em;
+    font-size: 0.8rem;
+    color: #e9d5ff;
+  }
+  .setup-notice ol { margin: 0.5rem 0 0 1.2rem; }
+  .setup-notice li { margin-bottom: 0.3rem; }
+
+  /* FOLDER SELECTOR */
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .folder-row {
+    display: flex; gap: 0.75rem; align-items: center;
+    margin-bottom: 1.75rem;
+  }
+  .folder-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .folder-input:focus { border-color: var(--accent2); }
+  .folder-input::placeholder { color: var(--muted); }
+  .folder-btn {
+    padding: 0.75rem 1.1rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .folder-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* DROP ZONE */
+  .drop-zone {
+    border: 2px dashed rgba(74,222,128,0.25);
+    border-radius: 18px;
+    background: rgba(74,222,128,0.03);
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(74,222,128,0.07);
+  }
+  .drop-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+
+  .drop-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 12px rgba(74,222,128,0.4));
+  }
+  .drop-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 0.4rem;
+  }
+  .drop-sub { color: var(--muted); font-size: 0.88rem; }
+  .drop-sub span { color: var(--accent2); font-weight: 500; }
+
+  /* TYPE FILTER */
+  .type-chips {
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+    margin-bottom: 1.75rem;
+  }
+  .chip {
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--muted); color: var(--text); }
+  .chip.active { border-color: var(--accent); background: rgba(74,222,128,0.1); color: var(--accent); }
+
+  /* FILE LIST */
+  .file-list {
+    display: flex; flex-direction: column; gap: 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .file-item {
+    display: flex; align-items: center; gap: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    animation: slideIn 0.2s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .file-thumb {
+    width: 42px; height: 42px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: var(--surface2);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+  }
+  .file-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+
+  .file-info { flex: 1; min-width: 0; }
+  .file-name {
+    font-size: 0.88rem; font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .file-meta { font-size: 0.75rem; color: var(--muted); margin-top: 0.15rem; }
+
+  .file-status {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+  }
+  .file-status.waiting  { color: var(--muted); background: var(--surface2); }
+  .file-status.uploading{ color: var(--warning); background: rgba(251,191,36,0.1); }
+  .file-status.done     { color: var(--accent);  background: rgba(74,222,128,0.1); }
+  .file-status.error    { color: var(--danger);  background: rgba(248,113,113,0.1); }
+
+  .file-remove {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 1rem; padding: 0.2rem; line-height: 1;
+    transition: color 0.2s;
+  }
+  .file-remove:hover { color: var(--danger); }
+
+  .progress-bar-wrap {
+    height: 3px; background: var(--surface2); border-radius: 99px;
+    margin-top: 0.4rem; overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width 0.3s;
+  }
+
+  /* STATS ROW */
+  .stats-row {
+    display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+  }
+  .stat-card {
+    flex: 1; min-width: 110px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+  }
+  .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.4rem;
+    line-height: 1;
+  }
+  .stat-val.green { color: var(--accent); }
+  .stat-val.cyan  { color: var(--accent2); }
+  .stat-val.purple{ color: var(--accent3); }
+  .stat-lbl { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
+
+  /* ACTIONS */
+  .actions {
+    display: flex; gap: 0.75rem; flex-wrap: wrap;
+  }
+  .btn-primary {
+    flex: 1;
+    padding: 0.9rem 2rem;
+    background: linear-gradient(135deg, var(--accent), #16a34a);
+    border: none; border-radius: 12px;
+    color: #051a0a;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(74,222,128,0.2);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(74,222,128,0.35); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .btn-secondary {
+    padding: 0.9rem 1.4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* EMPTY STATE */
+  .empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  /* TOAST */
+  .toast-area {
+    position: fixed; bottom: 2rem; right: 2rem;
+    display: flex; flex-direction: column; gap: 0.6rem;
+    z-index: 100;
+  }
+  .toast {
+    padding: 0.75rem 1.2rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    animation: toastIn 0.25s ease;
+    max-width: 300px;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .toast.success { background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.3); color: var(--accent); }
+  .toast.error   { background: rgba(248,113,113,0.15); border: 1px solid rgba(248,113,113,0.3); color: var(--danger); }
+  .toast.info    { background: rgba(34,211,238,0.12); border: 1px solid rgba(34,211,238,0.25); color: var(--accent2); }
+
+  /* MOBILE */
+  @media (max-width: 520px) {
+    .drop-zone { padding: 2rem 1rem; }
+    .stats-row { gap: 0.5rem; }
+    header { flex-wrap: wrap; gap: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toast-area" id="toastArea"></div>
+
+<div class="container">
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">📦</div>
+      <h1>Drive<span>Box</span></h1>
+    </div>
+    <button class="auth-btn" id="authBtn" onclick="handleAuth()">
+      <span class="dot" id="authDot"></span>
+      <span id="authLabel">Conectar Google Drive</span>
+    </button>
+  </header>
+
+  <!-- SETUP GUIDE -->
+  <div class="setup-notice" id="setupNotice">
+    <strong>⚙️ Configuração necessária (1 vez)</strong> — Para usar com seu Google Drive real:
+    <ol>
+      <li>Acesse <a href="https://console.cloud.google.com" target="_blank" style="color:#c4b5fd">console.cloud.google.com</a> e crie um projeto.</li>
+      <li>Ative a <strong>Google Drive API</strong> e a <strong>Google Picker API</strong>.</li>
+      <li>Crie credenciais OAuth 2.0 (tipo "Aplicativo da Web") e copie o <code>Client ID</code>.</li>
+      <li>Cole abaixo e clique em <strong>Salvar</strong>.</li>
+    </ol>
+    <div style="margin-top:0.9rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
+      <input id="clientIdInput" placeholder="Cole seu Google Client ID aqui"
+        style="flex:1;min-width:200px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.25);border-radius:8px;padding:0.5rem 0.75rem;color:#e9d5ff;font-size:0.82rem;outline:none;font-family:'DM Sans',sans-serif;">
+      <button onclick="saveClientId()"
+        style="padding:0.5rem 1rem;background:rgba(167,139,250,0.2);border:1px solid rgba(167,139,250,0.4);border-radius:8px;color:#e9d5ff;cursor:pointer;font-size:0.82rem;font-family:'DM Sans',sans-serif;">
+        Salvar
+      </button>
+    </div>
+  </div>
+
+  <!-- FOLDER -->
+  <div class="section-label">📁 Pasta de destino</div>
+  <div class="folder-row">
+    <input class="folder-input" id="folderName" placeholder="Nome da pasta (ex: Fotos Viagem 2025)" value="DriveBox Upload">
+    <button class="folder-btn" onclick="pickFolder()">🗂 Escolher pasta</button>
+  </div>
+
+  <!-- TYPE FILTER -->
+  <div class="section-label">Filtrar por tipo</div>
+  <div class="type-chips" id="typeChips">
+    <div class="chip active" data-type="all" onclick="filterType('all', this)">Tudo</div>
+    <div class="chip" data-type="image" onclick="filterType('image', this)">🖼 Fotos</div>
+    <div class="chip" data-type="video" onclick="filterType('video', this)">🎬 Vídeos</div>
+    <div class="chip" data-type="audio" onclick="filterType('audio', this)">🎵 Áudios</div>
+    <div class="chip" data-type="application/pdf" onclick="filterType('application/pdf', this)">📄 PDFs</div>
+    <div class="chip" data-type="other" onclick="filterType('other', this)">📎 Outros</div>
+  </div>
+
+  <!-- DROP ZONE -->
+  <div class="drop-zone" id="dropZone">
+    <input type="file" id="fileInput" multiple onchange="handleFiles(this.files)">
+    <div class="drop-icon">☁️</div>
+    <div class="drop-title">Solte arquivos aqui</div>
+    <div class="drop-sub">ou clique para <span>selecionar do dispositivo</span></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row" id="statsRow" style="display:none">
+    <div class="stat-card">
+      <div class="stat-val green" id="statTotal">0</div>
+      <div class="stat-lbl">Arquivos</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val cyan" id="statSize">0 MB</div>
+      <div class="stat-lbl">Tamanho total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val purple" id="statDone">0</div>
+      <div class="stat-lbl">Enviados</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="statPending" style="color:var(--warning)">0</div>
+      <div class="stat-lbl">Pendentes</div>
+    </div>
+  </div>
+
+  <!-- FILE LIST -->
+  <div class="file-list" id="fileList">
+    <div class="empty" id="emptyMsg">Nenhum arquivo selecionado ainda.</div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions" id="actionsRow" style="display:none">
+    <button class="btn-primary" id="uploadBtn" onclick="startUpload()">
+      ⬆️ Enviar para o Drive
+    </button>
+    <button class="btn-secondary" onclick="clearAll()">🗑 Limpar</button>
+  </div>
+
+</div>
+
+<!-- Google APIs: gsi must load first, gapi after -->
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let CLIENT_ID = localStorage.getItem('drivebox_client_id') || '';
+let ACCESS_TOKEN = null;
+let files = [];
+let targetFolderId = 'root';
+let filterMode = 'all';
+let uploading = false;
+let tokenClient = null;
+let gapiReady = false;
+let gsiReady  = false;
+
+// ─── CLIENT ID ───────────────────────────────────────────────────────────────
+function saveClientId() {
+  const val = document.getElementById('clientIdInput').value.trim();
+  if (!val) { showToast('Cole o Client ID primeiro.', 'error'); return; }
+  CLIENT_ID = val;
+  localStorage.setItem('drivebox_client_id', val);
+  showToast('Client ID salvo! Clique em "Conectar Google Drive".', 'success');
+  document.getElementById('setupNotice').style.display = 'none';
+}
+
+// Restore saved client id
+window.addEventListener('DOMContentLoaded', () => {
+  if (CLIENT_ID) {
+    document.getElementById('clientIdInput').value = CLIENT_ID;
+    document.getElementById('setupNotice').style.display = 'none';
+  }
+});
+
+// ─── LOAD GOOGLE SCRIPTS SEQUENTIALLY ───────────────────────────────────────
+function loadScript(src, onload) {
+  const s = document.createElement('script');
+  s.src = src;
+  s.async = true;
+  s.defer = true;
+  s.onload = onload;
+  s.onerror = () => console.warn('Falha ao carregar:', src);
+  document.head.appendChild(s);
+}
+
+// 1) Load GSI first
+loadScript('https://accounts.google.com/gsi/client', () => {
+  gsiReady = true;
+  // 2) Then load GAPI
+  loadScript('https://apis.google.com/js/api.js', () => {
+    gapi.load('client', () => {
+      gapiReady = true;
+    });
+  });
+});
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+function handleAuth() {
+  if (ACCESS_TOKEN) { signOut(); return; }
+  if (!CLIENT_ID) { showToast('Configure e salve o Client ID primeiro.', 'error'); return; }
+  if (!gsiReady) { showToast('Aguarde — Google ainda está carregando...', 'info'); return; }
+
+  try {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/drive.file',
+      callback: (resp) => {
+        if (resp.error) {
+          showToast('Erro ao autenticar: ' + resp.error, 'error');
+          return;
+        }
+        ACCESS_TOKEN = resp.access_token;
+        setAuthUI(true);
+        showToast('Conectado ao Google Drive! ✓', 'success');
+      }
+    });
+    tokenClient.requestAccessToken({ prompt: 'consent' });
+  } catch(e) {
+    showToast('Erro: ' + e.message, 'error');
+    console.error(e);
+  }
+}
+
+function signOut() {
+  if (ACCESS_TOKEN) {
+    try { google.accounts.oauth2.revoke(ACCESS_TOKEN); } catch(e) {}
+  }
+  ACCESS_TOKEN = null;
+  tokenClient = null;
+  setAuthUI(false);
+  showToast('Desconectado.', 'info');
+}
+
+function setAuthUI(connected) {
+  const btn = document.getElementById('authBtn');
+  const lbl = document.getElementById('authLabel');
+  btn.className = 'auth-btn' + (connected ? ' connected' : '');
+  lbl.textContent = connected ? 'Desconectar' : 'Conectar Google Drive';
+}
+
+// ─── FOLDER PICKER ─────────────────────────────────────────────────────────────
+function pickFolder() {
+  if (!ACCESS_TOKEN) { showToast('Conecte ao Google Drive primeiro.', 'error'); return; }
+  if (!gapiReady) { showToast('Aguarde — Google ainda está carregando...', 'info'); return; }
+
+  gapi.load('picker', () => {
+    try {
+      const picker = new google.picker.PickerBuilder()
+        .addView(new google.picker.DocsView()
+          .setIncludeFolders(true)
+          .setSelectFolderEnabled(true)
+          .setMimeTypes('application/vnd.google-apps.folder'))
+        .setOAuthToken(ACCESS_TOKEN)
+        .setCallback((data) => {
+          if (data.action === google.picker.Action.PICKED) {
+            const folder = data.docs[0];
+            targetFolderId = folder.id;
+            document.getElementById('folderName').value = folder.name;
+            showToast('Pasta selecionada: ' + folder.name, 'success');
+          }
+        })
+        .build();
+      picker.setVisible(true);
+    } catch(e) {
+      showToast('Erro ao abrir seletor: ' + e.message, 'error');
+    }
+  });
+}
+
+// ─── FILES ────────────────────────────────────────────────────────────────────
+function filterType(type, el) {
+  filterMode = type;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderFiles();
+}
+
+function handleFiles(rawFiles) {
+  const arr = Array.from(rawFiles);
+  arr.forEach(f => {
+    if (!files.find(x => x.file.name === f.name && x.file.size === f.size)) {
+      files.push({ file: f, status: 'waiting', progress: 0, id: Date.now() + Math.random() });
+    }
+  });
+  renderFiles();
+  updateStats();
+}
+
+function removeFile(id) {
+  files = files.filter(f => f.id !== id);
+  renderFiles(); updateStats();
+}
+
+function clearAll() {
+  files = []; renderFiles(); updateStats();
+  document.getElementById('actionsRow').style.display = 'none';
+  document.getElementById('statsRow').style.display = 'none';
+}
+
+function getIcon(mimeType) {
+  if (mimeType.startsWith('image/')) return '🖼';
+  if (mimeType.startsWith('video/')) return '🎬';
+  if (mimeType.startsWith('audio/')) return '🎵';
+  if (mimeType === 'application/pdf') return '📄';
+  if (mimeType.includes('zip') || mimeType.includes('rar')) return '🗜';
+  if (mimeType.includes('word')) return '📝';
+  if (mimeType.includes('sheet') || mimeType.includes('excel')) return '📊';
+  return '📎';
+}
+
+function matchFilter(file) {
+  if (filterMode === 'all') return true;
+  if (filterMode === 'image') return file.type.startsWith('image/');
+  if (filterMode === 'video') return file.type.startsWith('video/');
+  if (filterMode === 'audio') return file.type.startsWith('audio/');
+  if (filterMode === 'application/pdf') return file.type === 'application/pdf';
+  if (filterMode === 'other') return !file.type.startsWith('image/') && !file.type.startsWith('video/') && !file.type.startsWith('audio/') && file.type !== 'application/pdf';
+  return true;
+}
+
+function fmtSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1024/1024).toFixed(1) + ' MB';
+}
+
+function statusLabel(s) {
+  if (s === 'waiting')   return 'Aguardando';
+  if (s === 'uploading') return 'Enviando…';
+  if (s === 'done')      return '✓ Enviado';
+  if (s === 'error')     return '✗ Erro';
+  return s;
+}
+
+function renderFiles() {
+  const list = document.getElementById('fileList');
+  const empty = document.getElementById('emptyMsg');
+  const visible = files.filter(f => matchFilter(f.file));
+
+  if (files.length === 0) {
+    list.innerHTML = '<div class="empty" id="emptyMsg">Nenhum arquivo selecionado ainda.</div>';
+    document.getElementById('actionsRow').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('actionsRow').style.display = 'flex';
+  document.getElementById('statsRow').style.display = 'flex';
+
+  list.innerHTML = visible.map(item => {
+    const isImg = item.file.type.startsWith('image/');
+    const thumbSrc = isImg ? URL.createObjectURL(item.file) : null;
+    return `
+      <div class="file-item" id="item-${item.id}">
+        <div class="file-thumb">
+          ${thumbSrc ? `<img src="${thumbSrc}" alt="">` : getIcon(item.file.type)}
+        </div>
+        <div class="file-info">
+          <div class="file-name">${item.file.name}</div>
+          <div class="file-meta">${fmtSize(item.file.size)} · ${item.file.type || 'desconhecido'}</div>
+          ${item.status === 'uploading' ? `<div class="progress-bar-wrap"><div class="progress-bar" style="width:${item.progress}%"></div></div>` : ''}
+        </div>
+        <span class="file-status ${item.status}">${statusLabel(item.status)}</span>
+        ${item.status !== 'uploading' ? `<button class="file-remove" onclick="removeFile(${item.id})" title="Remover">✕</button>` : ''}
+      </div>`;
+  }).join('');
+
+  if (visible.length === 0) {
+    list.innerHTML += '<div class="empty">Nenhum arquivo nessa categoria.</div>';
+  }
+}
+
+function updateStats() {
+  const total = files.length;
+  const totalSize = files.reduce((a, f) => a + f.file.size, 0);
+  const done = files.filter(f => f.status === 'done').length;
+  const pending = files.filter(f => f.status === 'waiting').length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statSize').textContent = fmtSize(totalSize);
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statPending').textContent = pending;
+}
+
+// ─── UPLOAD ────────────────────────────────────────────────────────────────────
+async function startUpload() {
+  if (uploading) return;
+  if (!ACCESS_TOKEN) { showToast('Conecte ao Google Drive primeiro.', 'error'); return; }
+  const pending = files.filter(f => f.status === 'waiting');
+  if (pending.length === 0) { showToast('Nenhum arquivo para enviar.', 'info'); return; }
+
+  // Ensure folder exists
+  let folderId = await ensureFolder();
+  if (!folderId) { showToast('Não foi possível acessar a pasta no Drive.', 'error'); return; }
+
+  uploading = true;
+  document.getElementById('uploadBtn').disabled = true;
+  document.getElementById('uploadBtn').textContent = '⬆️ Enviando…';
+
+  for (const item of pending) {
+    item.status = 'uploading';
+    item.progress = 0;
+    renderFiles();
+    try {
+      await uploadFile(item, folderId);
+      item.status = 'done';
+      item.progress = 100;
+    } catch(e) {
+      item.status = 'error';
+      showToast('Erro ao enviar: ' + item.file.name, 'error');
+    }
+    renderFiles(); updateStats();
+  }
+
+  uploading = false;
+  document.getElementById('uploadBtn').disabled = false;
+  document.getElementById('uploadBtn').textContent = '⬆️ Enviar para o Drive';
+  const doneCount = files.filter(f => f.status === 'done').length;
+  showToast(`${doneCount} arquivo(s) enviado(s) com sucesso! 🎉`, 'success');
+}
+
+async function ensureFolder() {
+  const folderName = document.getElementById('folderName').value.trim() || 'DriveBox Upload';
+  if (targetFolderId !== 'root' && folderName !== '') return targetFolderId;
+
+  // Search for existing folder
+  const q = encodeURIComponent(`name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+    headers: { Authorization: 'Bearer ' + ACCESS_TOKEN }
+  });
+  const data = await res.json();
+  if (data.files && data.files.length > 0) return data.files[0].id;
+
+  // Create folder
+  const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + ACCESS_TOKEN, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: folderName, mimeType: 'application/vnd.google-apps.folder' })
+  });
+  const created = await createRes.json();
+  targetFolderId = created.id;
+  return created.id;
+}
+
+function uploadFile(item, folderId) {
+  return new Promise((resolve, reject) => {
+    const metadata = { name: item.file.name, parents: [folderId] };
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', item.file);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart');
+    xhr.setRequestHeader('Authorization', 'Bearer ' + ACCESS_TOKEN);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        item.progress = Math.round(e.loaded / e.total * 100);
+        renderFiles();
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve(JSON.parse(xhr.responseText));
+      else reject(new Error(xhr.responseText));
+    };
+    xhr.onerror = reject;
+    xhr.send(form);
+  });
+}
+
+// ─── DRAG & DROP ─────────────────────────────────────────────────────────────
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag-over');
+  handleFiles(e.dataTransfer.files);
+});
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+function showToast(msg, type='info') {
+  const area = document.getElementById('toastArea');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  area.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// gapi is loaded dynamically via loadScript() above
+</script>
+</body>
+</html>
