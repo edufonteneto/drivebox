@@ -388,10 +388,13 @@
       <div class="logo-icon">📦</div>
       <h1>Drive<span>Box</span></h1>
     </div>
-    <button class="auth-btn" id="authBtn" onclick="handleAuth()">
-      <span class="dot" id="authDot"></span>
-      <span id="authLabel">Conectar Google Drive</span>
-    </button>
+    <div style="display:flex;gap:0.5rem;align-items:center;">
+      <button class="auth-btn" id="settingsBtn" onclick="toggleSetup()" title="Configurar Client ID" style="padding:0.55rem 0.9rem;">⚙️</button>
+      <button class="auth-btn" id="authBtn" onclick="handleAuth()">
+        <span class="dot" id="authDot"></span>
+        <span id="authLabel">Conectar Google Drive</span>
+      </button>
+    </div>
   </header>
 
   <!-- SETUP GUIDE -->
@@ -488,6 +491,20 @@ let gapiReady = false;
 let gsiReady  = false;
 
 // ─── CLIENT ID ───────────────────────────────────────────────────────────────
+function toggleSetup() {
+  const panel = document.getElementById('setupNotice');
+  const btn = document.getElementById('settingsBtn');
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+    btn.style.borderColor = 'var(--accent3)';
+    btn.style.color = 'var(--accent3)';
+  } else {
+    panel.style.display = 'none';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }
+}
+
 function saveClientId() {
   const val = document.getElementById('clientIdInput').value.trim();
   if (!val) { showToast('Cole o Client ID primeiro.', 'error'); return; }
